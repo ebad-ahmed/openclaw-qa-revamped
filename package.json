@@ -1,0 +1,25 @@
+{
+  "name": "openclaw-qa",
+  "version": "1.0.0",
+  "description": "End-to-end QA automation for OpenClaw — PureSquare deployment",
+  "private": true,
+  "scripts": {
+    "test": "playwright test",
+    "test:auth": "playwright test tests/auth",
+    "test:chat": "playwright test tests/chat",
+    "test:skills": "playwright test tests/skills",
+    "test:smoke": "playwright test tests/smoke",
+    "test:canary": "playwright test tests/canary",
+    "test:ci": "playwright test --reporter=github",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "codegen": "playwright codegen"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.0",
+    "@types/node": "^20.11.0",
+    "dotenv": "^16.4.0",
+    "typescript": "^5.3.0"
+  }
+}
