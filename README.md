@@ -150,10 +150,9 @@ Copy `.env.example` to `.env` and fill in:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `OPENCLAW_BASE_URL` | OpenClaw web UI URL | `http://localhost:4000` |
+| `OPENCLAW_BASE_URL` | OpenClaw web UI URL | `http://localhost:18789` |
 | `OPENCLAW_GATEWAY_URL` | Gateway API URL | `http://localhost:18789` |
-| `TEST_USER_EMAIL` | Test account email | — |
-| `TEST_USER_PASSWORD` | Test account password | — |
+| `TEST_AUTH_TOKEN` | Gateway auth token (single-token login) | — |
 | `SKILLS_TO_VERIFY` | Comma-separated skill names to check | `browser,web-search` |
 | `ALERT_WEBHOOK_URL` | Slack/Discord webhook for canary alerts | — |
 | `OPENCLAW_LIVE_TEST` | Set to `1` to enable live model tests | — |
@@ -174,8 +173,7 @@ Add these secrets to your GitHub repository:
 ```
 OPENCLAW_BASE_URL
 OPENCLAW_GATEWAY_URL
-TEST_USER_EMAIL
-TEST_USER_PASSWORD
+TEST_AUTH_TOKEN
 SKILLS_TO_VERIFY
 ALERT_WEBHOOK_URL
 ```
