@@ -17,7 +17,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : 1,
-  timeout: 60_000,                // generous timeout for AI round-trips
+  timeout: 300_000,               // 5 min — includes startup wait + model response time
   expect: { timeout: 15_000 },
 
   reporter: [
@@ -27,7 +27,7 @@ export default defineConfig({
   ],
 
   use: {
-    baseURL: process.env.OPENCLAW_BASE_URL ?? "http://localhost:4000",
+    baseURL: process.env.OPENCLAW_BASE_URL ?? "http://localhost:18789",
     headless: true,
     screenshot: "only-on-failure",
     video: "retain-on-failure",
@@ -41,12 +41,6 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
-
-    // ── Mobile Safari (companion app surface) ─────────────────────────────
-    {
-      name: "mobile-safari",
-      use: { ...devices["iPhone 13"] },
-      testMatch: /smoke|auth/,    // run only lightweight suites on mobile
-    },
+    // mobile-safari removed — missing WebKit system libs
   ],
 });

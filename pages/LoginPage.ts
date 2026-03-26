@@ -3,13 +3,8 @@
  * ------------------
  * Page-Object Model for the OpenClaw login / authentication screen.
  *
- * SELECTOR GUIDE
- * ──────────────
- * Selectors use `data-testid` attributes first (stable), then accessible-role
- * locators (resilient), then CSS selectors (last resort).
- *
- * Update the selectors below to match your actual DOM once the app is running.
- * Run `pnpm codegen` to capture live selectors from the browser.
+ * The OpenClaw UI uses token-based auth via a gateway token.
+ * There is NO email field — only a WebSocket URL, gateway token, and optional password.
  */
 
 import { type Page, type Locator, expect } from "@playwright/test";
@@ -18,37 +13,23 @@ export class LoginPage {
   readonly page: Page;
 
   // ── Locators ──────────────────────────────────────────────────────────────
-  readonly emailInput: Locator;
+  readonly wsUrlInput: Locator;
+  readonly tokenInput: Locator;
   readonly passwordInput: Locator;
   readonly submitButton: Locator;
   readonly errorMessage: Locator;
-  readonly forgotPasswordLink: Locator;
+  readonly loginGate: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
-    // Prefer data-testid → role → CSS
-    this.emailInput = page
-      .getByTestId("login-email")
-      .or(page.getByRole("textbox", { name: /email/i }))
-      .or(page.locator("input[type='email']"));
-
-    this.passwordInput = page
-      .getByTestId("login-password")
-      .or(page.getByRole("textbox", { name: /password/i }))
-      .or(page.locator("input[type='password']"));
-
-    this.submitButton = page
-      .getByTestId("login-submit")
-      .or(page.getByRole("button", { name: /sign in|log in|login/i }));
-
-    this.errorMessage = page
-      .getByTestId("login-error")
-      .or(page.locator("[role='alert']"));
-
-    this.forgotPasswordLink = page.getByRole("link", {
-      name: /forgot.*(password)?/i,
-    });
+    this.wsUrlInput = page.locator('input[placeholder*="ws://"]');
+    this.tokenInput = page.locator('input[placeholder*="OPENCLAW_GATEWAY_TOKEN"]');
+    this.passwordInput = page.locator('input[placeholder="optional"]');
+    this.submitButton = page.locator('.login-gate__card button', { hasText: 'Connect' });
+    // Exclude the update banner from error messages
+    this.errorMessage = page.locator('[role="alert"]:not(.update-banner)');
+    this.loginGate = page.locator('.login-gate__card');
   }
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -58,8 +39,8 @@ export class LoginPage {
     await this.page.waitForLoadState("networkidle");
   }
 
-  async fillEmail(email: string) {
-    await this.emailInput.fill(email);
+  async fillToken(token: string) {
+    await this.tokenInput.fill(token);
   }
 
   async fillPassword(password: string) {
@@ -70,23 +51,22 @@ export class LoginPage {
     await this.submitButton.click();
   }
 
-  /** One-shot helper: fill credentials and click submit. */
-  async login(email: string, password: string) {
-    await this.fillEmail(email);
-    await this.fillPassword(password);
+  /**
+   * One-shot helper: fill gateway token and click Connect.
+   * Waits for the login gate card to disappear (SPA stays at /login/chat).
+   */
+  async login(token: string) {
+    await this.fillToken(token);
     await this.submit();
 
-    // Wait for redirect away from /login (post-login destination)
-    await this.page.waitForURL((url) => !url.pathname.includes("/login"), {
-      timeout: 20_000,
-    });
+    // Wait for the login gate to disappear — SPA transitions to /login/chat?session=main
+    await expect(this.loginGate).toBeHidden({ timeout: 20_000 });
   }
 
   // ── Assertions ────────────────────────────────────────────────────────────
 
   async expectLoginPageVisible() {
-    await expect(this.emailInput).toBeVisible();
-    await expect(this.passwordInput).toBeVisible();
+    await expect(this.tokenInput).toBeVisible();
     await expect(this.submitButton).toBeVisible();
   }
 
@@ -95,7 +75,7 @@ export class LoginPage {
     if (text) await expect(this.errorMessage).toContainText(text);
   }
 
-  async expectRedirectedToLogin() {
-    await expect(this.page).toHaveURL(/\/login/);
+  async expectLoginGateVisible() {
+    await expect(this.loginGate).toBeVisible();
   }
 }

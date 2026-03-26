@@ -37,15 +37,15 @@ export const test = base.extend<OpenClawFixtures>({
     await use(new SettingsPage(page));
   },
 
-  /** Convenience fixture: navigates to the app and logs in before handing
-   *  control to the test.  The test receives a ready-to-use ChatPage. */
+  /** Convenience fixture: navigates to the app, authenticates with the
+   *  gateway token, and hands control to the test with a ready ChatPage. */
   authedPage: async ({ page }, use) => {
+    const token = process.env.TEST_AUTH_TOKEN ?? "";
+
     const login = new LoginPage(page);
     await login.goto();
-    await login.login(
-      process.env.TEST_USER_EMAIL ?? "qa-tester@puresquare.com",
-      process.env.TEST_USER_PASSWORD ?? "changeme"
-    );
+    await login.login(token);
+
     const chat = new ChatPage(page);
     await chat.waitForReady();
     await use(chat);

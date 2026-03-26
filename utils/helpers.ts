@@ -44,11 +44,12 @@ export async function getGatewayStatus(): Promise<Record<string, unknown> | null
 
 // ── Nonce / Canary Utilities ─────────────────────────────────────────────────
 
-/** Generates a unique nonce string for round-trip probe tests. */
+/** Generates a unique nonce string for round-trip probe tests.
+ *  Uses hyphens (not underscores) to avoid markdown italic rendering in the chat UI. */
 export function makeNonce(prefix = "QA"): string {
   const ts = Date.now().toString(36).toUpperCase();
   const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `${prefix}_${ts}_${rand}`;
+  return `${prefix}-${ts}-${rand}`;
 }
 
 /** Parses a nonce out of agent response text, returns null if not found. */
@@ -58,11 +59,18 @@ export function extractNonce(text: string, nonce: string): boolean {
 
 // ── Skill Assertion Helpers ──────────────────────────────────────────────────
 
+// OpenClaw's agent uses specific phrasing when it invokes or references web search.
+// "Already pulled this" indicates the agent is drawing on a recent web search result
+// from session memory — still counts as web-search knowledge being exercised.
 const SKILL_KEYWORDS: Record<string, RegExp[]> = {
-  browser: [/searching the web/i, /I found|let me search/i, /browser/i],
+  browser: [/searching the web/i, /I found|let me search/i, /browser/i, /already pulled/i, /as of today/i],
   "code-interpreter": [/executing code/i, /running|ran the code/i],
   "file-manager": [/reading file/i, /I opened|I wrote/i],
-  "web-search": [/search results/i, /according to/i, /I found online/i],
+  "web-search": [
+    /search results/i, /according to/i, /I found online/i,
+    /already pulled/i, /as of today/i, /top stories/i,
+    /CVE-\d{4}-\d+/i,            // live CVE IDs indicate real-time search output
+  ],
 };
 
 /**

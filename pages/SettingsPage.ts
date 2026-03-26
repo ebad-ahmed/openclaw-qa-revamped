@@ -1,8 +1,8 @@
 /**
  * pages/SettingsPage.ts
  * ----------------------
- * Page-Object Model for the OpenClaw Settings screen.
- * Covers model selection, API key management, channel configuration.
+ * Page-Object Model for the OpenClaw Config screen.
+ * Located at /login/config in the SPA.
  */
 
 import { type Page, type Locator, expect } from "@playwright/test";
@@ -11,32 +11,19 @@ export class SettingsPage {
   readonly page: Page;
 
   readonly modelSelector: Locator;
-  readonly apiKeyInput: Locator;
   readonly saveButton: Locator;
   readonly successToast: Locator;
 
   constructor(page: Page) {
     this.page = page;
 
-    this.modelSelector = page
-      .getByTestId("model-selector")
-      .or(page.getByRole("combobox", { name: /model/i }));
-
-    this.apiKeyInput = page
-      .getByTestId("api-key-input")
-      .or(page.locator("input[type='password'][name*='key' i]"));
-
-    this.saveButton = page
-      .getByTestId("settings-save")
-      .or(page.getByRole("button", { name: /save|apply/i }));
-
-    this.successToast = page
-      .getByTestId("success-toast")
-      .or(page.locator("[role='status']").filter({ hasText: /saved|success/i }));
+    this.modelSelector = page.locator('select').nth(1); // second select is model
+    this.saveButton = page.getByRole("button", { name: /save|apply/i });
+    this.successToast = page.locator("[role='status']").filter({ hasText: /saved|success/i });
   }
 
   async goto() {
-    await this.page.goto("/settings");
+    await this.page.goto("/login/config");
     await this.page.waitForLoadState("networkidle");
   }
 

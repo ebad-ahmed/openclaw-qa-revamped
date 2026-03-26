@@ -8,8 +8,7 @@
  * failures via the ALERT_WEBHOOK_URL environment variable.
  *
  * Run schedule:
- *   */10 * * * *  npx playwright test tests/canary --reporter=json | \
- *                 node scripts/canary-alert.js
+ *   every 10 minutes npx playwright test tests/canary --reporter=json
  *
  * Pass criteria (all must pass):
  *  ✓ Gateway /healthz returns 200
