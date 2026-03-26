@@ -41,6 +41,14 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
-    // mobile-safari removed — missing WebKit system libs
+
+    // ── Mobile Safari (iPhone 13) ─────────────────────────────────────────
+    // Runs only the lightweight smoke + auth suites — skips chat/skills/canary
+    // which require long AI response waits not suited for mobile testing.
+    {
+      name: "mobile-safari",
+      use: { ...devices["iPhone 13"] },
+      testMatch: /smoke|auth/,
+    },
   ],
 });
