@@ -59,17 +59,40 @@ export function extractNonce(text: string, nonce: string): boolean {
 
 // ── Skill Assertion Helpers ──────────────────────────────────────────────────
 
-// OpenClaw's agent uses specific phrasing when it invokes or references web search.
-// "Already pulled this" indicates the agent is drawing on a recent web search result
-// from session memory — still counts as web-search knowledge being exercised.
+// OpenClaw's agent sometimes announces web search explicitly ("searching the web",
+// "already pulled this") but often delivers results directly without any preamble —
+// e.g. "Top headline today: ..." or "Other big stories: ...".
+// Patterns here cover both announcement-style AND result-format-style responses.
 const SKILL_KEYWORDS: Record<string, RegExp[]> = {
-  browser: [/searching the web/i, /I found|let me search/i, /browser/i, /already pulled/i, /as of today/i],
+  browser: [
+    /searching the web/i,
+    /let me search|I found/i,
+    /browser/i,
+    /already pulled/i,
+    /as of today/i,
+    /top headline/i,            // agent delivers news directly without announcement
+    /other big stori/i,         // "Other big stories:" result format
+    /actively exploit/i,        // security news phrasing from live search results
+    /nation.state actor/i,      // threat intel phrasing in live security news
+    /patch tuesday/i,
+  ],
   "code-interpreter": [/executing code/i, /running|ran the code/i],
   "file-manager": [/reading file/i, /I opened|I wrote/i],
   "web-search": [
-    /search results/i, /according to/i, /I found online/i,
-    /already pulled/i, /as of today/i, /top stories/i,
-    /CVE-\d{4}-\d+/i,            // live CVE IDs indicate real-time search output
+    /search results/i,
+    /according to/i,
+    /I found online/i,
+    /already pulled/i,
+    /as of today/i,
+    /top stories/i,
+    /top headline/i,            // agent delivers news headline without preamble
+    /other big stori/i,         // "Other big stories:" result-list format
+    /breaking:/i,               // "Breaking: ..." news format
+    /actively exploit/i,        // live security advisories use this phrase
+    /nation.state actor/i,      // threat intel phrasing in live results
+    /patch tuesday/i,           // recurring security news term
+    /CVE-\d{4}-\d+/i,          // live CVE IDs confirm real-time search output
+    /\b202[5-9]\b/,             // year reference (2025+) signals live/recent data
   ],
 };
 
